@@ -36,7 +36,10 @@ email:
        default:{
         url : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
         publicId: null
-       },
+       }
+
+    },
+
 
        bio: {
         type: String
@@ -53,8 +56,6 @@ email:
        }
 
 
-    },
-
 
 
 
@@ -68,10 +69,10 @@ email:
 const secret = process.env.JWT_SECRET;
 
 UserSchema.methods.generateAuthToken = function(){
+    console.log(this._id, this.isAdmin);
 return jwt.sign({
     id: this._id,
     isAdmin: this.isAdmin,
-
 },secret )
  }
 
@@ -95,10 +96,30 @@ function validateUser(obj){
 function validateLoginUser(obj){
     const schema = joi.object({
         email: joi.string().trim().max(100).required().email(),
-        password: joi.string().trim().min(6).required()
+        password: joi.string().trim().min(6).required(),
+
+
 
     });
     return schema.validate(obj)
 
 }
-module.exports = {User, validateUser , validateLoginUser};
+
+
+//validate update user
+
+function validateUpdateUser(obj){
+    const schema = joi.object({
+        username: joi.string().trim().min(2),
+        email: joi.string().trim().max(100).email(),
+        password: joi.string().trim().min(6),
+        bio: joi.string()
+
+
+
+    });
+    return schema.validate(obj)
+
+}
+
+module.exports = {User, validateUser , validateLoginUser, validateUpdateUser};
