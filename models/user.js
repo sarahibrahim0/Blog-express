@@ -61,8 +61,17 @@ email:
 
 },
 {
-    timestamps: true
+    timestamps: true,
+    toJSON :{virtuals: true},
+    toObject:{virtuals: true}
 
+});
+
+//populate posts that belongs to the user when getting the profile
+UserSchema.virtual('posts', {
+    ref: "Post",
+    foreignField: "user",
+    localField: "_id"
 })
 
 //generate token

@@ -7,6 +7,12 @@ const {
 } = require("../models/user");
 const bcrypt = require("bcryptjs");
 
+const path = require("path");
+const {cloudinaryRemoveManyImages,cloudinaryUploadImage, cloudinaryRemoveImage} = require("../utils/cloudinary")
+const fs = require("fs");
+const { Post } = require("../models/post");
+
+
 /**
  *@description get all users
  *
@@ -19,11 +25,10 @@ const bcrypt = require("bcryptjs");
  */
 
 module.exports.getAllUsersCtrl = asyncHandler(async (req, res) => {
-  // console.log(req.user)
-  // if(!req.user.isAdmin){
-  //    return res.status(403).send("not allowed, only admins")
-  // }
-  const users = await User.find().select("-password");
+
+  const users = await User.find()
+  .select("-password")
+  .populate("posts");
   res.status(200).json(users);
 });
 
@@ -43,7 +48,10 @@ module.exports.getUserCtrl = asyncHandler(async (req, res) => {
   // if(!req.user.isAdmin){
   //    return res.status(403).send("not allowed, only admins")
   // }
-  const user = await User.findById(req.params.id).select("-password");
+  const user = await User.findById(req.params.id)
+  .select("-password")
+  .populate("posts");
+
   if (!user) {
     return res.status(401).send("no such a user");
   }
@@ -99,11 +107,96 @@ module.exports.updateUserCtrl = asyncHandler(async (req, res) => {
  *
  */
 
- module.exports.getUsersCountCtrl = asyncHandler(async (req, res) => {
-
-  const users = await User.countDocuments();
-  if (!users) {
-    return res.status(401).send("no users exist");
+module.exports.getUsersCountCtrl = asyncHandler( async (req, res) => {
+  const userCount = await User.countDocuments();
+  if (!userCount) {
+    res.status(500).json({ success: false });
+  } else {
+    res.send({ userCount: userCount });
   }
-  res.status(200).json(count);
+});
+
+/**
+ *@description profile photo upload
+ *
+ * @router /api/users/profile/profile-photo
+ *
+ * @method POST
+ *
+ * @access private (only logged user)
+ *
+ */
+
+ module.exports.profilePhotoCtrl = asyncHandler( async (req, res) => {
+  //1.validation
+  if(!req.file){
+    res.status(400).json({message: "no file provided"})
+
+  }
+  //2.get the path to the image
+  const imagePath= path.join(__dirname,`../images/${req.file.filename}`);
+
+  //3.upload to cloudinary
+const result = await cloudinaryUploadImage(imagePath);
+
+  //4.get the user from DB
+  const user = await User.findById(req.user.id);
+
+  //5.delete old profile photo if exists
+  if(user.profilePhoto.publicId !== null ){
+  await cloudinaryRemoveImage(user.profilePhoto.publicId);
+  }
+  //6.change the profile photo in DB
+  user.profilePhoto = {
+    url: result.secure_url,
+    publicId:result.public_id
+  }
+  await user.save();
+
+  //7.send res to the client
+  res.status(200).send({message:"your profile photo uploaded successfully",
+profilePhoto: {url: result.secure_url, publicId: result.public_id}});
+
+  //8.delete image from server
+fs.unlinkSync(imagePath);
+});
+
+
+/**
+ *@description  delete user profile
+ *
+ * @router /api/users/profile/:id
+ *
+ * @method DELETE
+ *
+ * @access private (only admin or user himself)
+ *
+ */
+
+ module.exports.deleteUserCtrl = asyncHandler(async (req, res) => {
+
+  //1.get user from DB
+  const user = await User.findById(req.params.id);
+  if(!user){
+    return res.status(404).send({message: 'user not found'})
+  }
+  //2.get all posts from DB
+  const posts = await Post.find({user: user._id})
+  //3.get the public ids from DB
+  const publicIds = posts?.map(post=>post.image.publicId)
+  //4.delete all posts image from cloudinary of the user
+if(publicIds?.length > 0){
+  await cloudinaryRemoveManyImages(publicIds);
+}
+  //5.delete the profile picture from cloudinary
+  await cloudinaryRemoveImage(user.profilePhoto.publicId);
+  //6.delete user posts and comments
+  await Post.deleteMany({user: user._id});
+  await Comment.deleteMany({user : user._id})
+  //7.delete the user himself
+  await User.findByIdAndDelete(req.params.id)
+
+  //8.send res to the client
+  res.status(200).send({message: 'your profile has been deleted'});
+
 });

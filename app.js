@@ -1,6 +1,7 @@
 const express = require("express");
 require('dotenv/config');
 
+const { errorHandler, notFound } = require("./middlewares/error");
 
 
 //init app
@@ -14,7 +15,16 @@ app.use(express.json());
 
 app.use("/api/auth", require("./routes/authRoute"));
 app.use("/api/users", require("./routes/userRoute"));
+app.use("/api/posts", require("./routes/postRoute"));
+app.use("/api/comments", require("./routes/commentRoute"));
+app.use("/api/categories", require("./routes/categoryRoute"));
 
+
+//not found middleware
+app.use(notFound);
+
+//errorHandler middleware
+app.use(errorHandler);
 
 
 //Running the server
