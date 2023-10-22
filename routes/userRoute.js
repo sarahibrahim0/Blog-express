@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const { getAllUsersCtrl, getUserCtrl, updateUserCtrl, getUsersCountCtrl, profilePhotoCtrl, deleteUserCtrl } = require("../controllers/usersController");
-const { verifyTokenAndAdmin, verifyTokenUser, verifyTokenUserAndAdmin } = require("../middlewares/verifyToken");
+const { verifyTokenAndAdmin, verifyTokenUser, verifyTokenUserAndAdmin, verifyToken } = require("../middlewares/verifyToken");
 const validateObjectId = require("../middlewares/validateObjectId");
 const photoUpload = require("../middlewares/photoUpload");
 
@@ -22,7 +22,7 @@ router.route("/count").get(verifyTokenAndAdmin, getUsersCountCtrl);
 
 //api/users/profile/profile-photo/:id
 
-router.route("/profile/profile-photo/:id").post(verifyTokenUser, photoUpload.single("image"), profilePhotoCtrl);
+router.route("/profile/profile-photo").post(verifyToken, photoUpload.single("image"), profilePhotoCtrl);
 
 
 module.exports = router;
