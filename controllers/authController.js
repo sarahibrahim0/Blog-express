@@ -40,7 +40,7 @@ const { use } = require("../routes/authRoute");
 
     await user.save();
     //send response to client
-    res.status(201).send('you registered successfully , log in')
+    res.status(201).send('you registered successfully,log in')
 
 
  })
@@ -78,7 +78,7 @@ const { use } = require("../routes/authRoute");
     const token = user.generateAuthToken();
 
     //send response to client
-    res.status(200).send({_id : user._id, isAdmin: user.isAdmin, profilePhoto: user.profilePhoto, token})
+    res.status(200).send({_id : user._id, isAdmin: user.isAdmin, profilePhoto: user.profilePhoto, token, username : user.username})
 
 
  })

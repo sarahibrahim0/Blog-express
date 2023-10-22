@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require('cors');
 require('dotenv/config');
 
 const { errorHandler, notFound } = require("./middlewares/error");
@@ -7,10 +8,14 @@ const { errorHandler, notFound } = require("./middlewares/error");
 //init app
 const app = express();
 
+
 //middlewares
 
 app.use(express.json());
 
+app.use(cors({
+  origin:"http://localhost:3000"
+}));
 //Routes
 
 app.use("/api/auth", require("./routes/authRoute"));
@@ -29,7 +34,6 @@ app.use(errorHandler);
 
 //Running the server
 
-const PORT = process.env.PORT || 3000;
 
 
 
@@ -42,8 +46,8 @@ mongoose
   .connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true, dbName: "Blog-backend"})
   .then(() => {
     console.log("Database Connection is ready.");
-app.listen(3000, ()=>{
-  console.log('server is runnin now on 3000')
+app.listen(8000, ()=>{
+  console.log('server is runnin now on 8000')
 })
 
   })
