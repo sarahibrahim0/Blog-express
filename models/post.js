@@ -64,31 +64,24 @@ PostSchema.virtual("comments",{
 const Post = mongoose.model("Post", PostSchema);
 
 //validate create post
-function validateCreatePost(obj){
+function validateCreatePost(obj) {
     const schema = Joi.object({
-        title :Joi.string().trim().min(2).max(200).required(),
-        description :Joi.string().trim().min(10).required(),
-        user: Joi.required(),
-        category :Joi.string().trim().required(),
-        image:Joi.object()
-
-    })
-
+      title: Joi.string().trim().min(2).max(200).required(),
+      description: Joi.string().trim().min(10).required(),
+      category: Joi.string().trim().required(),
+    });
     return schema.validate(obj);
-}
+  }
 
-//validate update post
-function validateUpdatePost(obj){
+  // Validate Update Post
+  function validateUpdatePost(obj) {
     const schema = Joi.object({
-        title :Joi.string().trim().min(2).max(200),
-        description :Joi.string().trim().min(10),
-        category :Joi.string().trim(),
-        image:Joi.object()
-
-    })
-
+      title: Joi.string().trim().min(2).max(200),
+      description: Joi.string().trim().min(10),
+      category: Joi.string().trim(),
+    });
     return schema.validate(obj);
-}
+  }
 
 module.exports ={
     Post,

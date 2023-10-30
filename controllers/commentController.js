@@ -72,7 +72,7 @@ res.status(201).json(comment);
   }
   if(req.user.isAdmin || req.user.id === comment.user.toString() ){
     await Comment.findByIdAndDelete(req.params.id)
-    res.status(200).json({message: "comment has been deleted"})
+    res.status(200).json({message: "comment has been deleted", commentId : comment._id})
   }else{
     res.status(403).json({message: "access denied, not allowed"})
 

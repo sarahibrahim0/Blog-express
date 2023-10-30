@@ -11,7 +11,7 @@ const path = require("path");
 const {cloudinaryRemoveManyImages,cloudinaryUploadImage, cloudinaryRemoveImage} = require("../utils/cloudinary")
 const fs = require("fs");
 const { Post } = require("../models/post");
-
+const {Comment} = require ("../models/comment")
 
 /**
  *@description get all users
@@ -85,7 +85,7 @@ module.exports.updateUserCtrl = asyncHandler(async (req, res) => {
       password: req.body.password,
       bio: req.body.bio,
     },
-  }, {new:true }).select("-password");
+  }, {new:true }).select("-password").populate("posts");
 
 
   if (!updatedUser) {
@@ -189,8 +189,9 @@ if(publicIds?.length > 0){
   await cloudinaryRemoveManyImages(publicIds);
 }
   //5.delete the profile picture from cloudinary
-  await cloudinaryRemoveImage(user.profilePhoto.publicId);
-  //6.delete user posts and comments
+  if(user?.profilePhoto?.publicId !== null)
+{  await cloudinaryRemoveImage(user?.profilePhoto?.publicId);
+}  //6.delete user posts and comments
   await Post.deleteMany({user: user._id});
   await Comment.deleteMany({user : user._id})
   //7.delete the user himself

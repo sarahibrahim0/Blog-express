@@ -18,7 +18,7 @@ cloudinary.config({
         });
         return data;
         }catch(error){
-            throw new Error("internal server error (coudainary)")
+            throw new Error("internal server error (cloudinary)")
         }
 
     }
@@ -30,7 +30,7 @@ cloudinary.config({
         const result = await cloudinary.uploader.destroy(imagePublicId);
         return result;
         }catch(error){
-            throw new Error("internal server error (coudainary)")
+            throw new Error("internal server error (cloudinary)")
         }
     }
 

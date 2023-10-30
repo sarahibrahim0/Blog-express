@@ -11,6 +11,7 @@ const {
   cloudinaryUploadImage,
 } = require("../utils/cloudinary");
 
+const{Comment} = require("../models/comment")
 /**
  *@description get all posts
  *
@@ -29,14 +30,14 @@ module.exports.getAllPostsCtrl = asyncHandler(async (req, res) => {
 
   if (pageNumber) {
     posts = await Post.find()
-      .skip((pageNumber - 1) * POST_PER_PAGE)
+      .skip((pageNumber-1)* POST_PER_PAGE)
       .limit(POST_PER_PAGE)
-      .populate("user", ["-password"])
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .populate("user", ["-password"]);
   } else if (category) {
-    posts = await Post.find({ category: category })
-      .populate("user", ["-password"])
-      .sort({ createdAt: -1 });
+    posts = await Post.find({ category })
+      .sort({ createdAt: -1 })
+      .populate("user", ["-password"]);
   } else {
     posts = await Post.find()
       .sort({ createdAt: -1 })
@@ -71,7 +72,7 @@ module.exports.getSinglePostCtrl = asyncHandler(async (req, res) => {
 /**
  *@description  get posts count
  *
- * @router /api/count
+ * @router /api/posts/count
  *
  * @method GET
  *
@@ -101,17 +102,16 @@ module.exports.getPostsCountCtrl = asyncHandler(async (req, res) => {
 module.exports.createPostCtrl = asyncHandler(async (req, res) => {
   //1.validation for image
   if (!req.file) {
-    return res.status(400).send({ message: "no image provided" });
+    return res.status(400).json({ message: "no image provided" });
   }
   //2.validation for data
   const { error } = validateCreatePost(req.body);
   if (error) {
-    return res.status(400).send({ message: error.details[0].message });
+    return res.status(400).json({ message: error.details[0].message });
   }
 
   //3.upload photo
   const imagePath = path.join(__dirname, `../images/${req.file.filename}`);
-
   const result = await cloudinaryUploadImage(imagePath);
 
   //4.create new post and save it to DB
@@ -150,17 +150,24 @@ module.exports.deleteSinglePostCtrl = asyncHandler(async (req, res) => {
   if (!post) {
     return res.status(404).json({ message: "post not found" });
   }
-  console.log(req);
   if (req.user.isAdmin || req.user.id === post.user.toString()) {
-    await Post.findByIdAndDelete(req.params.id);
-    await cloudinaryRemoveImage(post.image.publicId);
 
+    if(post?.image.publicId)
+{    await cloudinaryRemoveImage(post?.image?.publicId);
+}
     //delete comments on post
-    await Comment.deleteMany({postId: post._id});
+    if(post?.comments?.length !== 0)
+{    await Comment.deleteMany({postId: post._id});
+}
 
-    return res.status(200).json({ message: "you post has been deleted successfully" });
+await Post.findByIdAndDelete(req.params.id);
+
+      res.status(200).json({
+      message: "post has been deleted successfully",
+      postId: post._id,
+    });
   } else {
-    return res.send(403).json({ message: "only authorized users allowed" });
+    res.status(403).json({ message: "access denied, forbidden" });
   }
 });
 

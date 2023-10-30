@@ -37,8 +37,6 @@ function validateCreateComment(obj) {
   const schema = Joi.object({
     postId: Joi.string().required().label("Post Id"),
     text: Joi.string().trim().min(1).required(),
-    userName: Joi.required(),
-    user: Joi.required(),
   });
 
   return schema.validate(obj);
