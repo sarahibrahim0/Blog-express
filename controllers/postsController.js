@@ -209,7 +209,8 @@ module.exports.updateSinglePostCtrl = asyncHandler(async (req, res) => {
       },
     },
     { new: true }
-  ).populate("user", ["-password"]);
+  ).populate("user", ["-password"])
+  .populate("comments");
 
   //send response
   return res.status(200).json(updatedPost);
