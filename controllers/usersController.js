@@ -48,14 +48,38 @@ module.exports.getUserCtrl = asyncHandler(async (req, res) => {
   // if(!req.user.isAdmin){
   //    return res.status(403).send("not allowed, only admins")
   // }
+
   const user = await User.findById(req.params.id)
   .select("-password")
   .populate("posts");
+
+
 
   if (!user) {
     return res.status(401).send("no such a user");
   }
   res.status(200).json(user);
+
+
+});
+
+
+
+
+module.exports.getUserPostsCtrl = asyncHandler(async (req, res) => {
+
+  const posts_per_pages = 6;
+  const id = req.params.id;
+  const page_number = parseInt(req.query.pageNumber);
+
+  const posts = await Post.find({ user: id})
+  .skip((page_number - 1) * posts_per_pages)
+  .limit(posts_per_pages)
+
+
+
+  res.status(200).json(posts);
+
 });
 
 /**
@@ -77,15 +101,23 @@ module.exports.updateUserCtrl = asyncHandler(async (req, res) => {
   if (req.body.password) {
     const salt = await bcrypt.genSalt(10);
     req.body.password = await bcrypt.hash(req.body.password, salt);
+
   }
+  const user = await User.findById(req.params.id);
+  console.log(user , 'user')
+
   const updatedUser = await User.findByIdAndUpdate(req.params.id, {
     $set: {
       username: req.body.username,
       email: req.body.email,
       password: req.body.password,
       bio: req.body.bio,
+      socialMedia: [...req.body.socialMedia]
     },
-  }, {new:true }).select("-password").populate("posts");
+  }, {new:true }).populate("posts");
+
+// }, {new:true }).select("-password").populate("posts");
+
 
 
   if (!updatedUser) {
@@ -181,8 +213,25 @@ fs.unlinkSync(imagePath);
     return res.status(404).send({message: 'user not found'})
   }
   //2.get all posts from DB
-  const posts = await Post.find({user: user._id})
-  //3.get the public ids from DB
+  const posts = await Post.find({ likes: { $in: [user._id] } });
+
+    posts.map( async (post)=>
+    {
+      // const isPostAlreadyLiked = post.likes.find(
+      //   (user) => user.toString() === req.user.id
+      // );
+
+      // if (isPostAlreadyLiked) {
+        //remove like from array
+        await Post.findByIdAndUpdate(post._id, {
+          $pull: {
+            likes: user._id,
+          },
+        },{new: true});
+
+  }
+    )
+ //3.get the public ids from DB
   const publicIds = posts?.map(post=>post.image.publicId)
   //4.delete all posts image from cloudinary of the user
 if(publicIds?.length > 0){
@@ -198,6 +247,6 @@ if(publicIds?.length > 0){
   await User.findByIdAndDelete(req.params.id)
 
   //8.send res to the client
-  res.status(200).send({message: 'your profile has been deleted'});
+  res.status(200).send({message: 'Profile has been deleted'});
 
 });

@@ -16,6 +16,13 @@ const app = express();
 //middlewares
 app.use(express.json());
 
+
+// setup the logger
+app.use(cors({
+  origin:"http://localhost:3000"
+}));
+
+
 //security headers (helmet)
 app.use(helmet());
 
@@ -26,14 +33,12 @@ app.use(hpp());
 app.use(xss());
 
 //rate limiting
-app.use(rateLimiting({
-  windowMs: 15  * 60 * 1000, // 15 minutes
-  max: 200, // limit each IP to 200 requests per windowMs
-}));
+// app.use(rateLimiting({
+//   windowMs: 15  * 60 * 1000, // 15 minutes
+//   max: 200, // limit each IP to 200 requests per windowMs
+// }));
 
-app.use(cors({
-  origin:"http://localhost:3000"
-}));
+
 //Routes
 
 app.use("/api/auth", require("./routes/authRoute"));

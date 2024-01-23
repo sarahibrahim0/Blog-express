@@ -43,12 +43,16 @@ if(error){
     res.status(400).json({message: error.details[0].message});
 }
 const profile = await User.findById(req.user.id);
-const comment = await Comment.create({
+let comment = await Comment.create({
     postId: req.body.postId,
     text:req.body.text,
     user : req.user.id,
     userName: profile.username
-});
+})
+
+comment = await Comment.findById(comment._id).populate('user');
+
+
 
 res.status(201).json(comment);
 });
@@ -70,7 +74,7 @@ res.status(201).json(comment);
   if(!comment){
     res.status(404).json({message:"no comment found"})
   }
-  if(req.user.isAdmin || req.user.id === comment.user.toString() ){
+  if(req.user.isAdmin || req.user.id === comment.user._id.toString() ){
     await Comment.findByIdAndDelete(req.params.id)
     res.status(200).json({message: "comment has been deleted", commentId : comment._id})
   }else{
@@ -110,7 +114,8 @@ if(!req.user.id === comment.user.toString()){
     $set:{
   text:req.body.text,
     }
-  },{new: true});
+  },{new: true})
+  .populate('user')
 
   res.status(200).json(updatedComment)
 

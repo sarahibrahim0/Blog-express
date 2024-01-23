@@ -36,6 +36,7 @@ cloudinary.config({
 
     //cloudinary remove many images
     const cloudinaryRemoveManyImages = async(imagePublicIds)=>{
+        console.log(imagePublicIds)
 
         try{
         const result = await cloudinary.v2.api.delete_resources(imagePublicIds)

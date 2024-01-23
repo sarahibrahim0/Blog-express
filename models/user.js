@@ -49,6 +49,15 @@ const UserSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+  socialMedia :[
+  {  name: {
+      type: String,
+    },
+    url: {
+      type: String,
+    }}
+  ]
   },
   {
     timestamps: true,
@@ -116,6 +125,7 @@ function validateUpdateUser(obj) {
     email: joi.string().trim().max(100).email(),
     password: passwordComplexity(),
     bio: joi.string(),
+    socialMedia: joi.array()
   });
   return schema.validate(obj);
 }

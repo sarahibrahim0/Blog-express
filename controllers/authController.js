@@ -64,7 +64,7 @@ module.exports.registerUserCtrl = asyncHandler(async (req, res) => {
   //response to the client
 
   //send response to client
-  res.status(201).json({ message: "we sent to you an email please verify it" });
+  res.status(201).json({ message: ` ${user.email}` });
 });
 
 /**

@@ -1,12 +1,17 @@
 
 const asyncHandler = require("express-async-handler");
 const {
-  Comment,
   validateCreateCategory,
   validateUpdateCategory,
 } = require("../models/category");
 
 const { Category } = require("../models/category");
+const { Post } = require("../models/post");
+const { Comment } = require("../models/comment");
+
+const { cloudinaryRemoveManyImages, cloudinaryRemoveImage } = require("../utils/cloudinary");
+const { findByIdAndDelete } = require("../models/VerificationToken");
+
 
 /**
  *@description get all categories
@@ -20,7 +25,7 @@ const { Category } = require("../models/category");
  */
 
  module.exports.getAllCategoriesCtrl = asyncHandler(async (req, res) => {
-    
+
     const categories = await Category.find().populate("user",["-password"])
 
     res.status(200).json(categories);
@@ -67,12 +72,26 @@ res.status(201).json(category);
 
  module.exports.deleteCategoryCtrl = asyncHandler(async (req, res) => {
 
-    const category = await Category.findById(req.params.id)
+    const category = await Category.findById(req.params.id);
     if(!category){
         res.send(404).json({message: "no category found"});
     }
     if(req.user.isAdmin){
+
+        const posts = await Post.find({category : category.title});
+           if(posts.length > 0 ){
+            for(let post of posts){
+                await cloudinaryRemoveImage(post.image.publicId);
+                if(posts.comments?.length !== 0)
+                {    await Comment.deleteMany({postId: posts._id});
+                }
+
+                await Post.findByIdAndDelete(post._id);
+
+                }
+           }
         await Category.findByIdAndDelete(req.params.id);
+
     }
 
 

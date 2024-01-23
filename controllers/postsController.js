@@ -11,7 +11,8 @@ const {
   cloudinaryUploadImage,
 } = require("../utils/cloudinary");
 
-const{Comment} = require("../models/comment")
+const{Comment} = require("../models/comment");
+const { populate } = require("dotenv");
 /**
  *@description get all posts
  *
@@ -24,7 +25,7 @@ const{Comment} = require("../models/comment")
  */
 
 module.exports.getAllPostsCtrl = asyncHandler(async (req, res) => {
-  const POST_PER_PAGE = 3;
+  const POST_PER_PAGE = 6;
   const { pageNumber, category } = req.query;
   let posts;
 
@@ -59,8 +60,14 @@ module.exports.getAllPostsCtrl = asyncHandler(async (req, res) => {
 
 module.exports.getSinglePostCtrl = asyncHandler(async (req, res) => {
   const post = await Post.findById(req.params.id)
+  .populate('likes')
   .populate("user", ["-password",])
-  .populate("comments")
+  .populate({
+    path:'comments',
+    populate:{
+      path:"user"
+    }
+  })
 
 
   if (!post) {
@@ -210,8 +217,12 @@ module.exports.updateSinglePostCtrl = asyncHandler(async (req, res) => {
     },
     { new: true }
   ).populate("user", ["-password"])
-  .populate("comments");
-
+  .populate({
+    path:'comments',
+    populate:{
+      path:"user"
+    }
+  })
   //send response
   return res.status(200).json(updatedPost);
 });
@@ -304,7 +315,13 @@ module.exports.updateSinglePostCtrl = asyncHandler(async (req, res) => {
       },
     },
     { new: true }
-  ).populate("user", ["-password"]);
+  ).populate("user", ["-password"])
+  .populate({
+    path:'comments',
+    populate:{
+      path:"user"
+    }
+  })
 
   //send response
   return res.status(200).json(updatedPost);
@@ -349,7 +366,7 @@ module.exports.togglePostLikeCtrl = asyncHandler(async (req, res) => {
       $push: {
         likes: loggedUser,
       },
-    },{new: true});
+    },{new: true}).populate('likes')
   }
 
   //7.send response
