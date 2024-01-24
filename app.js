@@ -4,6 +4,8 @@ const xss = require("xss-clean");
 const rateLimiting=require("express-rate-limit");
 const hpp = require("hpp");
 const helmet = require("helmet");
+const path = require('path');
+
 require('dotenv/config');
 
 const { errorHandler, notFound } = require("./middlewares/error");
@@ -11,6 +13,15 @@ const { errorHandler, notFound } = require("./middlewares/error");
 
 //init app
 const app = express();
+
+// Serve static files from the React app build directory
+app.use(express.static(path.join(__dirname, 'build')));
+
+// The "catchall" handler: for any request that doesn't
+// match one above, send back React's index.html file.
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname + '/build/index.html'));
+});
 
 
 //middlewares
