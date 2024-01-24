@@ -97,3 +97,26 @@ res.status(201).json(category);
 
     res.status(200).json({message:"category deleted", categoryId: category._id});
     });
+
+
+
+
+    module.exports.getCategoryPostsCtrl = asyncHandler(async (req, res) => {
+
+        const posts_per_pages = 6;
+        const category = req.params.category;
+        const page_number = parseInt(req.query.pageNumber);
+
+        const posts = await Post.find({ category: category})
+        .populate('likes')
+        .populate("user", ["-password",])
+        .populate({
+          path:'comments',
+          populate:{
+            path:"user"
+          }
+        }).skip((page_number - 1) * posts_per_pages)
+        .limit(posts_per_pages)
+        res.status(200).json(posts);
+
+      });

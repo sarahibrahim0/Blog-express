@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { createCategoryCtrl, getAllCategoriesCtrl, deleteCategoryCtrl } = require("../controllers/categoryController");
+const { createCategoryCtrl, getAllCategoriesCtrl, deleteCategoryCtrl, getCategoryPostsCtrl } = require("../controllers/categoryController");
 const validateObjectId = require("../middlewares/validateObjectId");
 const {verifyToken, verifyTokenAndAdmin, verifyTokenUser, verifyTokenUserAndAdmin } = require("../middlewares/verifyToken");
 
@@ -13,6 +13,10 @@ router.route("/")
 //api/categories/:id (delete category)
 router.route("/:id")
 .delete(validateObjectId,verifyTokenAndAdmin, deleteCategoryCtrl)
+
+//api/categories/:id (delete category)
+router.route("/category/:category")
+.get(getCategoryPostsCtrl)
 
 
 
