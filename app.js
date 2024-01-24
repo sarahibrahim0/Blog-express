@@ -18,9 +18,10 @@ app.use(express.json());
 
 
 // setup the logger
-app.use(cors({
-  origin:"http://localhost:3000"
-}));
+app.use(cors())
+
+app.options('*', cors())
+
 
 
 //security headers (helmet)
