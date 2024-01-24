@@ -113,7 +113,7 @@ module.exports.loginUserCtrl = asyncHandler(async (req, res) => {
     }
     await verificationToken.save();
 
-  const link = `${process.env.CLIENT_DOMAIN}/${user._id}/verify/${verificationToken.token}`;
+  const link = `https://blog-5g3k.onrender.com/${user._id}/verify/${verificationToken.token}`;
 
   //    putting the link into an html template
   const htmlTemplate = `
