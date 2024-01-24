@@ -14,15 +14,6 @@ const { errorHandler, notFound } = require("./middlewares/error");
 //init app
 const app = express();
 
-// Serve static files from the React app build directory
-app.use(express.static(path.join(__dirname, 'build')));
-
-// The "catchall" handler: for any request that doesn't
-// match one above, send back React's index.html file.
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname + '/build/index.html'));
-});
-
 
 //middlewares
 app.use(express.json());
@@ -69,6 +60,15 @@ app.use(errorHandler);
 
 
 //Running the server
+
+// Serve static files from the React app build directory
+app.use(express.static(path.join(__dirname, 'build')));
+
+// The "catchall" handler: for any request that doesn't
+// match one above, send back React's index.html file.
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname + '/build/index.html'));
+});
 
 
 
