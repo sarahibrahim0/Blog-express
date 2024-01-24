@@ -50,7 +50,7 @@ module.exports.registerUserCtrl = asyncHandler(async (req, res) => {
   await verificationToken.save();
 
   // make the link
-  const link = `https://blog-5g3k.onrender.com/api/auth/${user._id}/verify/${verificationToken.token}`;
+  const link = `https://react-blog-86b6e.web.app/api/auth/${user._id}/verify/${verificationToken.token}`;
 
   //    putting the link into an html template
   const htmlTemplate = `
@@ -113,7 +113,7 @@ module.exports.loginUserCtrl = asyncHandler(async (req, res) => {
     }
     await verificationToken.save();
 
-  const link  = `https://blog-5g3k.onrender.com/api/auth/${user._id}/verify/${verificationToken.token}`;
+  const link  = `https://react-blog-86b6e.web.app/api/auth/${user._id}/verify/${verificationToken.token}`;
 
   //    putting the link into an html template
   const htmlTemplate = `
