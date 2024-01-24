@@ -20,6 +20,7 @@ router.route("/user/:id")
 
 
 
+
 //api/users/count
 
 router.route("/count").get(verifyTokenAndAdmin, getUsersCountCtrl);
