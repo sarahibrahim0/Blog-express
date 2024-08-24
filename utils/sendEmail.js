@@ -8,6 +8,9 @@ module.exports = async (userEmail, subject, htmlTemplate) => {
         user: process.env.APP_EMAIL_ADDRESS,
         pass: process.env.APP_EMAIL_PASSWORD,
       },
+      tls: {
+        rejectUnauthorized: false
+    }
     });
 
     const mailOptions = {
